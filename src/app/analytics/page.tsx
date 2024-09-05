@@ -1,11 +1,7 @@
-import Browser from '@/components/analytics/browser';
-import Countries from '@/components/analytics/countries';
-import OperatingSystem from '@/components/analytics/operating-system';
-import Pages from '@/components/analytics/pages';
-import Referrers from '@/components/analytics/referrers';
 import { Views } from '@/components/analytics/views';
 import Event from '@/components/analytics/event';
 import { getData, getEvents, getSessions } from '@/lib/analytics';
+import BasicChart from '@/components/analytics/basic-chart';
 
 type Props = {}
 
@@ -16,13 +12,13 @@ async function AnalyticsPage({ }: Props) {
   const sessions = await getSessions();
 
   return (
-    <main className="mx-auto grid min-h-screen w-full max-w-6xl flex-1 grid-cols-1 place-content-center gap-4 pb-12 text-foreground lg:grid-cols-4 2xl:grid-cols-6">
+    <main className="mx-auto grid min-h-screen max-w-6xl flex-1 grid-cols-1 place-content-center gap-4 pb-12 text-foreground lg:grid-cols-4 2xl:grid-cols-6 w-full">
       <Views data={sessions} />
-      <Pages data={data} />
-      <Referrers data={sessions} />
-      <Countries data={sessions} />
-      <OperatingSystem data={sessions} />
-      <Browser data={sessions} />
+      <BasicChart data={data} valueKey="url" title="Pages" span={3} />
+      <BasicChart data={sessions} valueKey='referrer' title="Referrers" span={3} />
+      <BasicChart data={sessions} valueKey='country' title="Countries" />
+      <BasicChart data={sessions} valueKey='os' title="Operating Systems" />
+      <BasicChart data={sessions} valueKey='browser' title="Browsers" />
       <Event data={events} />
     </main>
   )
