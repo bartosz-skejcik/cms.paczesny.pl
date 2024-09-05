@@ -12,6 +12,7 @@ import {
 import {
   Card,
   CardContent,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -24,6 +25,9 @@ import {
 } from "@/components/ui/chart";
 import { handleData } from "@/lib/analytics";
 import { useState } from "react";
+import Link from "next/link";
+import { MaximizeIcon } from "lucide-react";
+import ChartModal from "./chart-modal";
 
 type Props = {
   data: any[]
@@ -32,7 +36,7 @@ type Props = {
   span?: 2 | 3
 }
 
-const chartConfig = {
+export const chartConfig = {
   hits: {
     label: "Hits",
     color: "hsl(var(--chart-1))",
@@ -44,6 +48,7 @@ const chartConfig = {
 
 function BasicChart({ data, valueKey, title, span = 2 }: Props) {
   const [chartData, setChartData] = useState([]);
+  const [open, setOpen] = useState(false);
 
   if (chartData.length === 0 && data && data.length > 0) {
     handleData(valueKey, data, setChartData);
@@ -51,62 +56,72 @@ function BasicChart({ data, valueKey, title, span = 2 }: Props) {
   }
 
   return (
-    <Card className={`col-span-1 h-fit lg:col-span-2 ${span == 3 ? "2xl:col-span-3" : ""}`}>
-      <CardHeader>
-        <CardTitle>{title}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        {valueKey && chartData.length > 0 &&
-          <ChartContainer config={chartConfig}>
-            <BarChart
-              accessibilityLayer
-              data={chartData}
-              layout="vertical"
-              margin={{
-                right: 16,
-              }}
-            >
-              <CartesianGrid horizontal={false} />
-              <YAxis
-                dataKey={valueKey}
-                type="category"
-                tickLine={false}
-                tickMargin={10}
-                axisLine={false}
-                tickFormatter={(value) => value.slice(0, 3)}
-                hide
-              />
-              <XAxis dataKey="hits" type="number" hide />
-              <ChartTooltip
-                cursor={false}
-                content={<ChartTooltipContent indicator="line" />}
-              />
-              <Bar
-                dataKey="hits"
+    <>
+
+      <ChartModal chartConfig={chartConfig} chartData={chartData} valueKey={valueKey} title={title} open={open} onOpenChange={() => setOpen(!open)} />
+      <Card className={`col-span-1 h-fit lg:col-span-2 ${span == 3 ? "2xl:col-span-3" : ""}`}>
+        <CardHeader>
+          <CardTitle>{title}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {valueKey && chartData.length > 0 &&
+            <ChartContainer config={chartConfig}>
+              <BarChart
+                accessibilityLayer
+                data={chartData.length > 6 ? chartData.slice(0, 6) : chartData}
                 layout="vertical"
-                fill="var(--color-hits)"
-                radius={4}
+                margin={{
+                  right: 16,
+                }}
               >
-                <LabelList
+                <CartesianGrid horizontal={false} />
+                <YAxis
                   dataKey={valueKey}
-                  position="insideLeft"
-                  offset={8}
-                  className="fill-[--color-label]"
-                  fontSize={12}
+                  type="category"
+                  tickLine={false}
+                  tickMargin={10}
+                  axisLine={false}
+                  tickFormatter={(value) => value.slice(0, 3)}
+                  hide
                 />
-                <LabelList
+                <XAxis dataKey="hits" type="number" hide />
+                <ChartTooltip
+                  cursor={false}
+                  content={<ChartTooltipContent indicator="line" />}
+                />
+                <Bar
                   dataKey="hits"
-                  position="right"
-                  offset={8}
-                  className="fill-secondary"
-                  fontSize={12}
-                />
-              </Bar>
-            </BarChart>
-          </ChartContainer>
-        }
-      </CardContent>
-    </Card>
+                  layout="vertical"
+                  fill="var(--color-hits)"
+                  radius={4}
+                >
+                  <LabelList
+                    dataKey={valueKey}
+                    position="insideLeft"
+                    offset={8}
+                    className="fill-[--color-label]"
+                    fontSize={12}
+                  />
+                  <LabelList
+                    dataKey="hits"
+                    position="right"
+                    offset={8}
+                    className="fill-secondary"
+                    fontSize={12}
+                  />
+                </Bar>
+              </BarChart>
+            </ChartContainer>
+          }
+          <CardFooter className="w-full flex items-center justify-center p-0 pt-5">
+            <button onClick={() => setOpen(true)} className="px-3 py-1 flex items-center justify-center gap-2 hover:bg-muted-foreground/10 text-sm rounded-lg transition-all duration-200">
+              <MaximizeIcon className="h-4 w-4" />
+              View full
+            </button>
+          </CardFooter>
+        </CardContent>
+      </Card>
+    </>
   )
 }
 
